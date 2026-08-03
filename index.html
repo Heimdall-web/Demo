@@ -215,10 +215,9 @@
       <div class="iframe-wrap">
         <iframe
           id="contentFrame"
-          src="https://script.google.com/macros/s/AKfycbyF5xsm2VFjJYDNEor3NbDg8iH5U5Is50pF3XAA49hWoKpntuWKvud_DCqjaRXRS1I/exec"
+          src="https://script.google.com/macros/s/AKfycbwpjqee9dcJa6zUYctBa9e2pNkeN9bK3IFO_ufL5KFnPoqaxkrcwPZZz4HutlycaWo/exec"
           title="Contenido principal"
           loading="eager"
-          allowfullscreen="true"
           allow="fullscreen; geolocation; microphone; camera"
           referrerpolicy="strict-origin-when-cross-origin"
         ></iframe>
@@ -254,8 +253,11 @@
       const errorReason = document.getElementById('errorReason');
 
       let iframeLoaded = false;
+      let hasShownMaintenance = false;
 
-      const showMaintenance = (reasonText = '403 · Sin acceso al contenido') => {
+      const showMaintenance = (reasonText = '401 · Error de acceso / formato incorrecto') => {
+        if (hasShownMaintenance) return;
+        hasShownMaintenance = true;
         iframeLoaded = true;
         errorReason.textContent = 'Motivo: ' + reasonText;
         loading.classList.add('hidden');
@@ -264,66 +266,61 @@
 
       const hideMaintenance = () => {
         iframeLoaded = true;
+        hasShownMaintenance = false;
         loading.classList.add('hidden');
         maintenance.classList.add('hidden');
       };
 
-      const detectErrorPage = () => {
+      const detectExplicitAccessError = () => {
         try {
           const doc = iframe.contentDocument || iframe.contentWindow?.document;
-          if (!doc || !doc.body) {
-            return '403 · Sin acceso al contenido';
-          }
+          if (!doc || !doc.body) return null;
 
           const text = (doc.body.innerText || '').toLowerCase();
-          if (!text) {
-            return '403 · Sin acceso al contenido';
-          }
+          if (!text) return null;
 
-          if (
-            text.includes('401') ||
-            text.includes('403') ||
+          const has401 = text.includes('401') && (
             text.includes('se trata de un error') ||
             text.includes('no puede procesar la solicitud') ||
-            text.includes('no tienes acceso a esta página') ||
-            text.includes('error de acceso') ||
+            text.includes('no tiene acceso') ||
             text.includes('formato es incorrecto')
-          ) {
+          );
+
+          const has403 = text.includes('403') && (
+            text.includes('se trata de un error') ||
+            text.includes('no tienes acceso a esta página') ||
+            text.includes('no tiene acceso') ||
+            text.includes('error')
+          );
+
+          if (has401 || has403) {
             return '401 · Error de acceso / formato incorrecto';
           }
 
           return null;
         } catch (e) {
-          return '403 · Sin acceso al contenido';
+          return null;
         }
       };
 
       iframe.addEventListener('load', () => {
-        const detectedError = detectErrorPage();
+        const detectedError = detectExplicitAccessError();
 
         if (detectedError) {
           showMaintenance(detectedError);
           return;
         }
 
-        // Si el iframe es de otro origen y no podemos leer su contenido,
-        // no lo consideramos como éxito: mostramos la pantalla de mantenimiento.
-        showMaintenance('403 · Sin acceso al contenido');
+        hideMaintenance();
       });
 
       iframe.addEventListener('error', () => {
-        showMaintenance('403 · Sin acceso al contenido');
+        showMaintenance('401 · Error de acceso / formato incorrecto');
       });
 
       reloadBtn.addEventListener('click', () => {
         window.location.reload();
       });
-
-      setTimeout(() => {
-        if (!iframeLoaded) {
-          showMaintenance('403 · Sin acceso al contenido');
-        }
-      }, 8000);
     </script>
   </body>
 </html>
