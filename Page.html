@@ -207,6 +207,247 @@
         }
       }
 
+      /* ── Barcode Scanner (fab + modal) ── */
+      .scanner-fab {
+        position: fixed;
+        bottom: max(1.5rem, env(safe-area-inset-bottom));
+        right: max(1.5rem, env(safe-area-inset-right));
+        z-index: 500;
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        border: none;
+        background: var(--accent);
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 18px rgba(139, 92, 246, 0.5);
+        transition: transform 0.2s ease, filter 0.2s ease;
+      }
+      .scanner-fab:hover,
+      .scanner-fab:focus-visible {
+        transform: scale(1.08);
+        filter: brightness(1.1);
+      }
+      .scanner-fab svg {
+        display: block;
+        width: 26px;
+        height: 26px;
+        fill: currentColor;
+      }
+
+      #scannerModal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      #scannerModal.hidden {
+        display: none !important;
+      }
+      #scannerVideo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: #000;
+      }
+      .scanner-ui {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+      .scanner-box {
+        width: min(72vw, 340px);
+        height: min(36vw, 200px);
+        border: 2px dashed rgba(255,255,255,0.85);
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+      }
+      .scanner-line {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        height: 2px;
+        background: linear-gradient(90deg, #0f0, #0aa);
+        animation: scanLine 2s linear infinite;
+      }
+      @keyframes scanLine {
+        0%   { top: 12%; }
+        50%  { top: 82%; }
+        100% { top: 12%; }
+      }
+      .scanner-label {
+        margin-top: 18px;
+        color: rgba(255,255,255,0.9);
+        font-size: 15px;
+        font-weight: 700;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.7);
+        text-align: center;
+        padding: 0 16px;
+      }
+      .scanner-top-row {
+        position: absolute;
+        top: max(12px, env(safe-area-inset-top));
+        left: max(12px, env(safe-area-inset-left));
+        right: max(12px, env(safe-area-inset-right));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        pointer-events: auto;
+        z-index: 2;
+      }
+      .scanner-title {
+        color: #fff;
+        font-size: 17px;
+        font-weight: 700;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+      }
+      .scanner-top-row-right {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .scanner-icon-btn {
+        pointer-events: auto;
+        background: rgba(0,0,0,0.45);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 8px;
+        color: #fff;
+        padding: 7px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .scanner-icon-btn svg {
+        display: block;
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+      }
+      .scanner-bottom-row {
+        position: absolute;
+        bottom: max(16px, env(safe-area-inset-bottom));
+        left: max(12px, env(safe-area-inset-left));
+        right: max(12px, env(safe-area-inset-right));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        pointer-events: auto;
+        z-index: 2;
+        gap: 8px;
+      }
+      .scanner-manual-btn {
+        pointer-events: auto;
+        background: rgba(0,0,0,0.45);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 7px 12px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .scanner-cam-select {
+        pointer-events: auto;
+        background: rgba(0,0,0,0.45);
+        border: 1px solid rgba(255,255,255,0.15);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 13px;
+        padding: 7px 10px;
+        cursor: pointer;
+        max-width: 160px;
+        appearance: none;
+      }
+      #scannerMsg {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+        color: rgba(255,255,255,0.9);
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.6;
+        z-index: 3;
+        background: rgba(0,0,0,0.7);
+      }
+      #scannerMsg.hidden { display: none !important; }
+
+      /* manual input modal */
+      #scannerManualModal {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #scannerManualModal.hidden { display: none !important; }
+      .scanner-manual-box {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        width: min(92vw, 360px);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .scanner-manual-box h3 {
+        margin: 0;
+        font-size: 16px;
+        color: #1f2328;
+      }
+      .scanner-manual-box input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 15px;
+        box-sizing: border-box;
+      }
+      .scanner-manual-footer {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .scanner-manual-footer button {
+        padding: 8px 18px;
+        border-radius: 8px;
+        border: none;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .scanner-manual-footer .btn-cancel {
+        background: #f3f4f6;
+        color: #374151;
+      }
+      .scanner-manual-footer .btn-ok {
+        background: var(--accent);
+        color: #fff;
+      }
+
       @media (max-width: 640px) {
         .app-shell {
           min-height: 100vh;
@@ -268,7 +509,353 @@
       <div id="errorReason" class="error-reason hidden" aria-live="polite">Motivo: 401 · Error de acceso / formato incorrecto</div>
     </div>
 
+    <!-- ── Barcode scanner FAB ── -->
+    <button class="scanner-fab" id="scannerFab" type="button" title="Lector de código de barras" aria-label="Abrir lector de código de barras">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M2 4h2v16H2V4zm3 0h1v16H5V4zm2 0h3v16H7V4zm4 0h1v16h-1V4zm2 0h2v16h-2V4zm3 0h1v16h-1V4zm2 0h2v16h-2V4z"/>
+      </svg>
+    </button>
+
+    <!-- ── Barcode scanner modal (lives in Page.html, not inside iframe) ── -->
+    <div id="scannerModal" class="hidden" role="dialog" aria-modal="true" aria-label="Lector de código de barras">
+      <video id="scannerVideo" autoplay playsinline muted></video>
+
+      <!-- top row: title + close -->
+      <div class="scanner-top-row">
+        <span class="scanner-title">Escanear código de barras</span>
+        <div class="scanner-top-row-right">
+          <button class="scanner-icon-btn" id="scannerCycleBtn" type="button" title="Cambiar cámara" aria-label="Cambiar cámara">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 5h-3.17l-1.84-2H9.01L7.17 5H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm-8 13a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/><path d="M12 10l-4 4h3v4h2v-4h3l-4-4z"/></svg>
+          </button>
+          <button class="scanner-icon-btn" id="scannerCloseBtn" type="button" title="Cerrar escáner" aria-label="Cerrar escáner">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><line x1="4" y1="4" x2="20" y2="20" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><line x1="20" y1="4" x2="4" y2="20" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- scanning box overlay -->
+      <div class="scanner-ui" aria-hidden="true">
+        <div class="scanner-box">
+          <div class="scanner-line"></div>
+        </div>
+        <p class="scanner-label">Apunta al código de barras</p>
+      </div>
+
+      <!-- bottom row: manual entry + camera select -->
+      <div class="scanner-bottom-row">
+        <button class="scanner-manual-btn" id="scannerManualOpenBtn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          Escribir manualmente
+        </button>
+        <select class="scanner-cam-select" id="scannerCamSelect" title="Seleccionar cámara" aria-label="Seleccionar cámara"></select>
+      </div>
+
+      <!-- error/status message overlay -->
+      <div id="scannerMsg" class="hidden" role="alert"></div>
+    </div>
+
+    <!-- ── Manual code input modal ── -->
+    <div id="scannerManualModal" class="hidden" role="dialog" aria-modal="true" aria-label="Ingresar código manualmente">
+      <div class="scanner-manual-box">
+        <h3>Ingresar código manualmente</h3>
+        <input type="text" id="scannerManualInput" placeholder="Código de barras..." autocomplete="off" />
+        <div class="scanner-manual-footer">
+          <button class="btn-cancel" id="scannerManualCancel" type="button">Cancelar</button>
+          <button class="btn-ok" id="scannerManualOk" type="button">Aceptar</button>
+        </div>
+      </div>
+    </div>
+
     <script>
+      // ── Barcode Scanner ── (runs in Page.html parent to bypass Google Script camera restrictions)
+      (function () {
+        'use strict';
+
+        var _stream = null;
+        var _track = null;
+        var _detector = null;
+        var _loopId = null;
+        var _running = false;
+        var _lastResult = '';
+        var _devices = [];
+        var _currentDeviceIndex = 0;
+        var _zxingLoaded = false;
+        var _zxingReader = null;
+
+        var fab       = document.getElementById('scannerFab');
+        var modal     = document.getElementById('scannerModal');
+        var video     = document.getElementById('scannerVideo');
+        var closeBtn  = document.getElementById('scannerCloseBtn');
+        var cycleBtn  = document.getElementById('scannerCycleBtn');
+        var camSel    = document.getElementById('scannerCamSelect');
+        var msgEl     = document.getElementById('scannerMsg');
+        var manualOpenBtn    = document.getElementById('scannerManualOpenBtn');
+        var manualModal      = document.getElementById('scannerManualModal');
+        var manualInput      = document.getElementById('scannerManualInput');
+        var manualCancelBtn  = document.getElementById('scannerManualCancel');
+        var manualOkBtn      = document.getElementById('scannerManualOk');
+
+        function showMsg(text) {
+          msgEl.textContent = text;
+          msgEl.classList.remove('hidden');
+        }
+        function hideMsg() {
+          msgEl.classList.add('hidden');
+        }
+
+        function stopStream() {
+          try {
+            if (_loopId) { clearTimeout(_loopId); _loopId = null; }
+            _running = false;
+            if (_zxingReader && _zxingReader.reset) { try { _zxingReader.reset(); } catch(e){} _zxingReader = null; }
+            if (_stream) { _stream.getTracks().forEach(function(t){ try { t.stop(); } catch(e){} }); _stream = null; _track = null; }
+            if (video) { try { video.srcObject = null; } catch(e){} }
+          } catch(e) { console.error('[Scanner] stopStream error', e); }
+        }
+
+        function openModal() {
+          modal.classList.remove('hidden');
+          hideMsg();
+          _lastResult = '';
+          startScanner();
+        }
+
+        function closeModal() {
+          stopStream();
+          modal.classList.add('hidden');
+        }
+
+        async function startScanner() {
+          try {
+            hideMsg();
+            _running = true;
+
+            // 1. Request camera permission and enumerate devices
+            try {
+              await navigator.mediaDevices.getUserMedia({ video: true });
+            } catch(e) {
+              var msg = 'No se pudo acceder a la cámara.';
+              if (e && (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError')) {
+                msg = 'Permiso de cámara denegado. Toca el ícono de cámara 🔒 en la barra de dirección del navegador y selecciona "Permitir", luego vuelve a intentarlo.';
+              } else if (e && (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError')) {
+                msg = 'No se encontró ninguna cámara en este dispositivo.';
+              } else if (e && e.message) {
+                msg = 'Error de cámara: ' + e.message;
+              }
+              showMsg(msg);
+              _running = false;
+              return;
+            }
+
+            // 2. Enumerate video devices
+            try {
+              var devs = await navigator.mediaDevices.enumerateDevices();
+              _devices = devs.filter(function(d){ return d.kind === 'videoinput'; });
+              camSel.innerHTML = '';
+              _devices.forEach(function(d, i){
+                var opt = document.createElement('option');
+                opt.value = d.deviceId;
+                opt.textContent = d.label || ('Cámara ' + (i + 1));
+                camSel.appendChild(opt);
+              });
+              if (_devices.length) {
+                // prefer back camera on mobile
+                var back = _devices.find(function(d){ return /back|rear|trasera|environment/i.test(d.label || ''); });
+                _currentDeviceIndex = back ? _devices.indexOf(back) : 0;
+                camSel.value = _devices[_currentDeviceIndex].deviceId;
+              }
+            } catch(e) { console.warn('[Scanner] enumerateDevices failed', e); }
+
+            // 3. Start stream
+            await startStream(_devices[_currentDeviceIndex] ? _devices[_currentDeviceIndex].deviceId : undefined);
+
+            // 4. Init BarcodeDetector or ZXing
+            await initDetector();
+
+            // 5. Detection loop
+            startLoop();
+
+          } catch(e) {
+            console.error('[Scanner] startScanner error', e);
+            showMsg('Error inesperado al iniciar el escáner: ' + (e && e.message ? e.message : String(e)));
+            _running = false;
+          }
+        }
+
+        async function startStream(deviceId) {
+          stopStream();
+          _running = true;
+          var constraints = { video: { width: { ideal: 1280 }, height: { ideal: 720 } } };
+          if (deviceId) constraints.video.deviceId = { ideal: deviceId };
+          try {
+            _stream = await navigator.mediaDevices.getUserMedia(constraints);
+          } catch(e) {
+            // retry without deviceId constraint
+            try {
+              _stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            } catch(e2) {
+              showMsg('No se pudo iniciar la cámara: ' + (e2 && e2.message ? e2.message : String(e2)));
+              _running = false;
+              throw e2;
+            }
+          }
+          video.srcObject = _stream;
+          try { video.play().catch(function(){}); } catch(e){}
+          _track = _stream.getVideoTracks()[0];
+        }
+
+        async function initDetector() {
+          _detector = null;
+          try {
+            if ('BarcodeDetector' in window) {
+              var supported = await BarcodeDetector.getSupportedFormats();
+              _detector = new BarcodeDetector({ formats: supported });
+              console.log('[Scanner] BarcodeDetector inicializado, formatos:', supported);
+            } else {
+              console.log('[Scanner] BarcodeDetector no disponible, usará ZXing');
+            }
+          } catch(e) {
+            console.warn('[Scanner] BarcodeDetector init error, usará ZXing', e);
+            _detector = null;
+          }
+        }
+
+        function startLoop() {
+          if (_loopId) { clearTimeout(_loopId); _loopId = null; }
+          (function loop() {
+            if (!_running) return;
+            try {
+              if (_detector) {
+                if (video.readyState >= 2) {
+                  _detector.detect(video).then(function(results) {
+                    if (results && results.length) {
+                      var code = (results[0] && results[0].rawValue) ? results[0].rawValue : '';
+                      if (code && code !== _lastResult) {
+                        _lastResult = code;
+                        onBarcodeDetected(code);
+                      }
+                    }
+                  }).catch(function(){});
+                }
+              } else {
+                // ZXing fallback
+                if (!_zxingLoaded) {
+                  loadZXing();
+                } else if (!_zxingReader) {
+                  startZXingReader();
+                }
+              }
+            } catch(e) {}
+            _loopId = setTimeout(loop, 250);
+          })();
+        }
+
+        function loadZXing() {
+          if (_zxingLoaded) return;
+          _zxingLoaded = true; // prevent double load
+          var s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.0.12/dist/index.umd.min.js';
+          s.async = true;
+          s.onload = function() {
+            console.log('[Scanner] ZXing cargado');
+            startZXingReader();
+          };
+          s.onerror = function() {
+            console.error('[Scanner] Error cargando ZXing');
+            showMsg('No se pudo cargar la librería de escaneo. Verifica tu conexión e intenta de nuevo.');
+          };
+          document.head.appendChild(s);
+        }
+
+        function startZXingReader() {
+          try {
+            var ZX = window.ZXingBrowser || window.ZXing || window.ZXingBrowserModule;
+            var ReaderCtor = (ZX && ZX.BrowserMultiFormatReader) ? ZX.BrowserMultiFormatReader : window.BrowserMultiFormatReader;
+            if (!ReaderCtor) { console.error('[Scanner] ZXing ReaderCtor not found'); return; }
+            if (_zxingReader && _zxingReader.reset) _zxingReader.reset();
+            _zxingReader = new ReaderCtor();
+            var devId = camSel.value || undefined;
+            _zxingReader.decodeFromVideoDevice(devId, 'scannerVideo', function(result, err) {
+              if (result && result.text && result.text !== _lastResult) {
+                _lastResult = result.text;
+                onBarcodeDetected(result.text);
+              }
+            });
+          } catch(e) { console.error('[Scanner] ZXing reader error', e); }
+        }
+
+        function onBarcodeDetected(code) {
+          console.log('[Scanner] Código detectado:', code);
+          closeModal();
+          // Send to iframe
+          var iframeEl = document.getElementById('contentFrame');
+          if (iframeEl && iframeEl.contentWindow) {
+            try {
+              iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, '*');
+            } catch(e) { console.error('[Scanner] postMessage error', e); }
+          }
+        }
+
+        // Camera cycle
+        function cycleCamera() {
+          if (!_devices.length) return;
+          _currentDeviceIndex = (_currentDeviceIndex + 1) % _devices.length;
+          var newId = _devices[_currentDeviceIndex].deviceId;
+          camSel.value = newId;
+          stopStream();
+          _running = true;
+          startStream(newId).then(function() {
+            initDetector().then(function() { startLoop(); });
+          }).catch(function(e){ showMsg('Error al cambiar cámara: ' + (e && e.message ? e.message : String(e))); });
+        }
+
+        // Manual input modal
+        function openManualModal() {
+          manualInput.value = '';
+          manualModal.classList.remove('hidden');
+          setTimeout(function(){ try { manualInput.focus(); } catch(e){} }, 50);
+        }
+        function closeManualModal() {
+          manualModal.classList.add('hidden');
+        }
+        function submitManual() {
+          var val = (manualInput.value || '').trim();
+          if (!val) return;
+          closeManualModal();
+          closeModal();
+          onBarcodeDetected(val);
+        }
+
+        // ── Event listeners ──
+        fab.addEventListener('click', openModal);
+        closeBtn.addEventListener('click', closeModal);
+        cycleBtn.addEventListener('click', cycleCamera);
+        camSel.addEventListener('change', function() {
+          var newId = camSel.value;
+          if (!newId) return;
+          _currentDeviceIndex = _devices.findIndex(function(d){ return d.deviceId === newId; });
+          if (_currentDeviceIndex < 0) _currentDeviceIndex = 0;
+          stopStream();
+          _running = true;
+          startStream(newId).then(function(){ initDetector().then(function(){ startLoop(); }); })
+            .catch(function(e){ showMsg('Error al cambiar cámara: ' + (e && e.message ? e.message : String(e))); });
+        });
+        manualOpenBtn.addEventListener('click', openManualModal);
+        manualCancelBtn.addEventListener('click', closeManualModal);
+        manualOkBtn.addEventListener('click', submitManual);
+        manualInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') submitManual(); });
+
+        // Close on Escape
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') {
+            if (!manualModal.classList.contains('hidden')) { closeManualModal(); return; }
+            if (!modal.classList.contains('hidden')) { closeModal(); }
+          }
+        });
+
+      })();
+      // ── End Barcode Scanner ──
+
       const iframe = document.getElementById('contentFrame');
       const loading = document.getElementById('loading');
       const maintenance = document.getElementById('maintenance');
