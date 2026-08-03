@@ -24,6 +24,7 @@
         --accent: #8b5cf6;
         --accent-strong: #7c3aed;
         --error: #ef4444;
+        --app-height: 100vh;
       }
 
       * {
@@ -42,12 +43,13 @@
 
       body {
         overflow: hidden;
+        overscroll-behavior: none;
       }
 
       .app-shell {
         position: relative;
         width: 100vw;
-        height: 100dvh;
+        height: var(--app-height);
         min-height: 100vh;
         background: linear-gradient(135deg, var(--bg) 0%, var(--bg-soft) 100%);
         padding:
@@ -77,6 +79,8 @@
       .maintenance {
         position: fixed;
         inset: 0;
+        width: 100vw;
+        height: var(--app-height);
         z-index: 20;
         display: flex;
         align-items: center;
@@ -86,6 +90,11 @@
           linear-gradient(rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.78)),
           url('./imagen%20de%20fondo.png') center/cover no-repeat;
         transition: opacity 0.25s ease, visibility 0.25s ease;
+        padding:
+          max(0.75rem, env(safe-area-inset-top))
+          max(0.75rem, env(safe-area-inset-right))
+          max(0.75rem, env(safe-area-inset-bottom))
+          max(0.75rem, env(safe-area-inset-left));
       }
 
       .loading.hidden,
@@ -265,6 +274,15 @@
       const maintenance = document.getElementById('maintenance');
       const reloadBtn = document.getElementById('reloadBtn');
       const errorReason = document.getElementById('errorReason');
+
+      const syncViewportHeight = () => {
+        const height = window.innerHeight || document.documentElement.clientHeight || screen.height;
+        document.documentElement.style.setProperty('--app-height', `${height}px`);
+      };
+
+      window.addEventListener('resize', syncViewportHeight);
+      window.addEventListener('orientationchange', syncViewportHeight);
+      syncViewportHeight();
 
       let iframeLoaded = false;
       let hasShownMaintenance = false;
