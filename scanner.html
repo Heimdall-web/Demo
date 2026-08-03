@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Escáner QR / Código de barras</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: rgba(15, 23, 42, 0.8);
+        --card: rgba(15, 23, 42, 0.6);
+        --accent: #0ea5e9;
+        --accent-strong: #0284c7;
+        --text: #e2e8f0;
+        --muted: #cbd5e1;
+        --danger: #fca5a5;
+        --success: #86efac;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(135deg, #020817 0%, #0f172a 100%);
+        color: var(--text);
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .shell {
+        width: min(96vw, 760px);
+        background: var(--panel);
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 24px 60px rgba(2, 6, 23, 0.55);
+      }
+
+      .video-wrap {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        background: #000;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+      }
+
+      video, canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        background: #000;
+      }
+
+      .scan-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      .scan-box {
+        width: min(68%, 360px);
+        height: min(45%, 240px);
+        border: 3px solid rgba(14, 165, 233, 0.9);
+        border-radius: 18px;
+        box-shadow: inset 0 0 0 9999px rgba(15, 23, 42, 0.22);
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 10px 16px;
+        background: var(--accent);
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button.secondary {
+        background: rgba(148, 163, 184, 0.2);
+        color: var(--text);
+      }
+
+      .status {
+        margin-top: 14px;
+        color: #dbeafe;
+        min-height: 22px;
+      }
+
+      .error {
+        margin-top: 10px;
+        color: var(--danger);
+        min-height: 20px;
+        display: none;
+      }
+
+      .manual {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .manual input {
+        flex: 1;
+        border-radius: 10px;
+        border: 1px solid rgba(148, 163, 184, 0.35);
+        background: rgba(15, 23, 42, 0.5);
+        color: white;
+        padding: 10px 12px;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <div class="video-wrap">
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="canvas" class="hidden"></canvas>
+        <div class="scan-overlay">
+          <div class="scan-box"></div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="scanButton" type="button">Abrir cámara</button>
+        <button id="closeButton" type="button" class="secondary">Cerrar</button>
+      </div>
+
+      <div class="manual">
+        <input id="manualInput" type="text" placeholder="Pega o escribe el código manualmente" />
+        <button id="manualSubmit" type="button">Aceptar</button>
+      </div>
+
+      <div id="status" class="status">Listo para escanear</div>
+      <div id="error" class="error"></div>
+      <input id="resultValue" type="hidden" />
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="./scanner.js"></script>
+  </body>
+</html>
