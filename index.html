@@ -897,6 +897,7 @@
       let iframeLoaded = false;
       let hasShownMaintenance = false;
       let iframeTimeoutId = null;
+      const maintenanceTimeoutMs = 15000;
 
       const clearIframeTimeout = () => {
         if (iframeTimeoutId) {
@@ -972,10 +973,10 @@
       });
 
       iframeTimeoutId = window.setTimeout(() => {
-        if (!iframeLoaded) {
+        if (!iframeLoaded && !hasShownMaintenance) {
           showMaintenance('El contenido remoto no respondió a tiempo.');
         }
-      }, 5000);
+      }, maintenanceTimeoutMs);
 
       reloadBtn.addEventListener('click', () => {
         window.location.reload();
