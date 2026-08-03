@@ -891,6 +891,7 @@
       const reloadBtn = document.getElementById('reloadBtn');
       const openRemoteBtn = document.getElementById('openRemoteBtn');
       const errorReason = document.getElementById('errorReason');
+      const fab = document.getElementById('scannerFab');
       const remoteUrl = iframe?.getAttribute('src') || 'https://script.google.com/macros/s/AKfycbwrYQ6KwUfmjM8RSRAHeiJWPw1AwbIXkXCqKFVPdnK4Mmy1WzrX7LGEm9dRCYrtbj8/exec';
 
       const syncViewportHeight = () => {
@@ -914,6 +915,17 @@
         }
       };
 
+      const setFabVisibility = (visible) => {
+        if (!fab) return;
+        if (visible) {
+          fab.classList.add('is-visible');
+          fab.setAttribute('aria-hidden', 'false');
+        } else {
+          fab.classList.remove('is-visible');
+          fab.setAttribute('aria-hidden', 'true');
+        }
+      };
+
       const showMaintenance = (reasonText = '401 · Error de acceso / formato incorrecto') => {
         if (hasShownMaintenance) return;
         hasShownMaintenance = true;
@@ -922,10 +934,7 @@
         errorReason.classList.remove('hidden');
         loading.classList.add('hidden');
         maintenance.classList.remove('hidden');
-        if (fab) {
-          fab.classList.remove('is-visible');
-          fab.setAttribute('aria-hidden', 'true');
-        }
+        setFabVisibility(false);
       };
 
       const hideMaintenance = () => {
@@ -934,10 +943,7 @@
         errorReason.classList.add('hidden');
         loading.classList.add('hidden');
         maintenance.classList.add('hidden');
-        if (fab) {
-          fab.classList.add('is-visible');
-          fab.setAttribute('aria-hidden', 'false');
-        }
+        setFabVisibility(true);
       };
 
       const detectExplicitAccessError = () => {
@@ -971,7 +977,7 @@
         }
       };
 
-      iframe.addEventListener('load', () => {
+      const handleIframeLoadState = () => {
         clearIframeTimeout();
         const detectedError = detectExplicitAccessError();
 
@@ -981,7 +987,24 @@
         }
 
         hideMaintenance();
-      });
+      };
+
+      iframe.addEventListener('load', handleIframeLoadState);
+
+      const checkIframeReadiness = () => {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow?.document;
+          const isReady = iframe.complete || Boolean(doc && (doc.readyState === 'complete' || doc.body));
+          if (isReady) {
+            handleIframeLoadState();
+          }
+        } catch (e) {
+          console.warn('[Iframe] No se pudo comprobar el estado de carga del iframe', e);
+        }
+      };
+
+      window.setTimeout(checkIframeReadiness, 150);
+      window.setTimeout(checkIframeReadiness, 1000);
 
       iframe.addEventListener('error', () => {
         clearIframeTimeout();
