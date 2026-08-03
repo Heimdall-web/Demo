@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Heimdall favicon">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#bg)"/>
+
+  <path d="M20 18.5v27h7.5v-10.5h9V45.5H44v-27h-7.5v10.5h-9V18.5H20Z" fill="#f8fafc"/>
+  <path d="M44 18.5l-9.5 27h7.2L51.2 18.5H44Z" fill="#a78bfa" opacity="0.95"/>
+</svg>
