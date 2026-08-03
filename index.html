@@ -1,26 +1,243 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta name="google-site-verification" content="JL0DhmvkXbV8ONTHyHKYCFZVC_XAcwcof0fZR-tbgPQ" />
-  <title>Embedded Content</title>
-</head>
-<body>
-  <iframe 
-    src="https://script.google.com/macros/s/AKfycbyF5xsm2VFjJYDNEor3NbDg8iH5U5Is50pF3XAA49hWoKpntuWKvud_DCqjaRXRS1I/exec"
-    width="100%"
-    height="100%"
-    allowfullscreen="true"
-    style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; border: none;">
-  </iframe>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="google-site-verification" content="JL0DhmvkXbV8ONTHyHKYCFZVC_XAcwcof0fZR-tbgPQ" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="Contenido embebido y optimizado para visualización en dispositivos móviles y escritorio."
+    />
+    <title>Contenido embebido</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --bg-soft: #111827;
+        --panel: rgba(15, 23, 42, 0.7);
+        --card: rgba(255, 255, 255, 0.08);
+        --border: rgba(255, 255, 255, 0.12);
+        --text: #e2e8f0;
+        --muted: #cbd5e1;
+        --accent: #8b5cf6;
+        --accent-strong: #7c3aed;
+        --success: #22c55e;
+        --error: #ef4444;
+      }
 
-  <script>
-    window.onload = function() {
-      document.querySelector('iframe')
-        .requestFullscreen()
-        .catch((err) => {
-          console.error('Error attempting to enable full-screen mode:', err.message);
-        });
-    };
-  </script>
-</body>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      .app-shell {
+        position: relative;
+        width: 100vw;
+        height: 100dvh;
+        height: 100vh;
+        background: linear-gradient(135deg, var(--bg) 0%, var(--bg-soft) 100%);
+        padding:
+          max(0px, env(safe-area-inset-top))
+          max(0px, env(safe-area-inset-right))
+          max(0px, env(safe-area-inset-bottom))
+          max(0px, env(safe-area-inset-left));
+      }
+
+      .iframe-wrap {
+        position: absolute;
+        inset: 0;
+        background: #ffffff;
+      }
+
+      iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #ffffff;
+      }
+
+      .loading,
+      .error {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+        background: rgba(15, 23, 42, 0.82);
+        backdrop-filter: blur(4px);
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+      }
+
+      .loading.hidden,
+      .error.hidden {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-title,
+      .error-title {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+      }
+
+      .loading-text,
+      .error-text {
+        margin: 0;
+        max-width: 28rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .fullscreen-btn {
+        position: absolute;
+        right: max(1rem, env(safe-area-inset-right));
+        bottom: max(1rem, env(safe-area-inset-bottom));
+        z-index: 3;
+        border: 1px solid var(--border);
+        background: rgba(15, 23, 42, 0.82);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        transition: transform 0.2s ease, background 0.2s ease;
+      }
+
+      .fullscreen-btn:hover,
+      .fullscreen-btn:focus-visible {
+        background: rgba(35, 46, 72, 0.9);
+        transform: translateY(-1px);
+      }
+
+      @media (max-width: 640px) {
+        .loading-title,
+        .error-title {
+          font-size: 1rem;
+        }
+
+        .loading-text,
+        .error-text {
+          font-size: 0.82rem;
+          padding: 0 1.25rem;
+        }
+
+        .fullscreen-btn {
+          padding: 0.7rem 0.9rem;
+          font-size: 0.8rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <div class="iframe-wrap">
+        <iframe
+          id="contentFrame"
+          src="https://script.google.com/macros/s/AKfycbyF5xsm2VFjJYDNEor3NbDg8iH5U5Is50pF3XAA49hWoKpntuWKvud_DCqjaRXRS1I/exec"
+          title="Contenido principal"
+          loading="eager"
+          allowfullscreen="true"
+          allow="fullscreen; geolocation; microphone; camera"
+          referrerpolicy="strict-origin-when-cross-origin"
+        ></iframe>
+      </div>
+
+      <div id="loading" class="loading" aria-live="polite">
+        <div class="spinner" aria-hidden="true"></div>
+        <p class="loading-title">Cargando contenido…</p>
+        <p class="loading-text">Estamos preparando la vista para que puedas acceder al contenido sin interrupciones.</p>
+      </div>
+
+      <div id="error" class="error hidden" aria-live="assertive">
+        <p class="error-title">No se pudo cargar el contenido</p>
+        <p class="error-text">La página externa no respondió a tiempo. Intenta recargar la vista o revisa tu conexión.</p>
+      </div>
+
+      <button id="fullscreenBtn" class="fullscreen-btn" type="button" aria-label="Activar pantalla completa">
+        Pantalla completa
+      </button>
+    </div>
+
+    <script>
+      const iframe = document.getElementById('contentFrame');
+      const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
+      const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+      let iframeLoaded = false;
+
+      const hideLoading = () => {
+        iframeLoaded = true;
+        loading.classList.add('hidden');
+      };
+
+      const showError = () => {
+        if (!iframeLoaded) {
+          loading.classList.add('hidden');
+          error.classList.remove('hidden');
+        }
+      };
+
+      iframe.addEventListener('load', hideLoading);
+      iframe.addEventListener('error', showError);
+
+      setTimeout(() => {
+        if (!iframeLoaded) {
+          showError();
+        }
+      }, 12000);
+
+      fullscreenBtn.addEventListener('click', async () => {
+        try {
+          if (document.fullscreenElement) {
+            await document.exitFullscreen();
+            return;
+          }
+
+          if (document.documentElement.requestFullscreen) {
+            await document.documentElement.requestFullscreen();
+          }
+        } catch (err) {
+          console.error('No se pudo activar la pantalla completa:', err);
+        }
+      });
+    </script>
+  </body>
 </html>
