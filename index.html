@@ -276,24 +276,23 @@
           const doc = iframe.contentDocument || iframe.contentWindow?.document;
           if (!doc || !doc.body) return null;
 
-          const text = (doc.body.innerText || '').toLowerCase();
+          const text = (doc.body.innerText || '').trim();
           if (!text) return null;
 
-          const has401 = text.includes('401') && (
-            text.includes('se trata de un error') ||
-            text.includes('no puede procesar la solicitud') ||
-            text.includes('no tiene acceso') ||
-            text.includes('formato es incorrecto')
-          );
+          const normalized = text.replace(/\s+/g, ' ');
 
-          const has403 = text.includes('403') && (
-            text.includes('se trata de un error') ||
-            text.includes('no tienes acceso a esta página') ||
-            text.includes('no tiene acceso') ||
-            text.includes('error')
-          );
+          if (!normalized.startsWith('401') && !normalized.startsWith('403')) {
+            return null;
+          }
 
-          if (has401 || has403) {
+          const exactPatterns = [
+            /^401\.\s*Se trata de un error\./i,
+            /^401\.\s*El servidor no puede procesar la solicitud/i,
+            /^403\.\s*Se trata de un error\./i,
+            /^403\.\s*Lo sentimos, pero no tienes acceso a esta página\./i
+          ];
+
+          if (exactPatterns.some((pattern) => pattern.test(normalized))) {
             return '401 · Error de acceso / formato incorrecto';
           }
 
@@ -315,7 +314,8 @@
       });
 
       iframe.addEventListener('error', () => {
-        showMaintenance('401 · Error de acceso / formato incorrecto');
+        // Solo se activa si realmente falla la carga del iframe.
+        // No se usa como fallback genérico para otros logs del navegador.
       });
 
       reloadBtn.addEventListener('click', () => {
