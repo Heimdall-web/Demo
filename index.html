@@ -255,7 +255,8 @@
 
       let iframeLoaded = false;
 
-      const showMaintenance = (reasonText = '401 · Error de acceso / formato incorrecto') => {
+      const showMaintenance = (reasonText = '403 · Sin acceso al contenido') => {
+        iframeLoaded = true;
         errorReason.textContent = 'Motivo: ' + reasonText;
         loading.classList.add('hidden');
         maintenance.classList.remove('hidden');
@@ -267,25 +268,51 @@
         maintenance.classList.add('hidden');
       };
 
-      iframe.addEventListener('load', () => {
+      const detectErrorPage = () => {
         try {
           const doc = iframe.contentDocument || iframe.contentWindow?.document;
-          if (doc && doc.body) {
-            const text = (doc.body.innerText || '').toLowerCase();
-            if (text.includes('401') || text.includes('se trata de un error') || text.includes('no puede procesar la solicitud')) {
-              showMaintenance('401 · Error de acceso / formato incorrecto');
-              return;
-            }
+          if (!doc || !doc.body) {
+            return '403 · Sin acceso al contenido';
           }
+
+          const text = (doc.body.innerText || '').toLowerCase();
+          if (!text) {
+            return '403 · Sin acceso al contenido';
+          }
+
+          if (
+            text.includes('401') ||
+            text.includes('403') ||
+            text.includes('se trata de un error') ||
+            text.includes('no puede procesar la solicitud') ||
+            text.includes('no tienes acceso a esta página') ||
+            text.includes('error de acceso') ||
+            text.includes('formato es incorrecto')
+          ) {
+            return '401 · Error de acceso / formato incorrecto';
+          }
+
+          return null;
         } catch (e) {
-          // El contenido es de otro origen, así que no se puede inspeccionar.
+          return '403 · Sin acceso al contenido';
+        }
+      };
+
+      iframe.addEventListener('load', () => {
+        const detectedError = detectErrorPage();
+
+        if (detectedError) {
+          showMaintenance(detectedError);
+          return;
         }
 
-        hideMaintenance();
+        // Si el iframe es de otro origen y no podemos leer su contenido,
+        // no lo consideramos como éxito: mostramos la pantalla de mantenimiento.
+        showMaintenance('403 · Sin acceso al contenido');
       });
 
       iframe.addEventListener('error', () => {
-        showMaintenance('401 · Error de acceso / formato incorrecto');
+        showMaintenance('403 · Sin acceso al contenido');
       });
 
       reloadBtn.addEventListener('click', () => {
@@ -294,9 +321,9 @@
 
       setTimeout(() => {
         if (!iframeLoaded) {
-          showMaintenance('401 · Error de acceso / formato incorrecto');
+          showMaintenance('403 · Sin acceso al contenido');
         }
-      }, 12000);
+      }, 8000);
     </script>
   </body>
 </html>
