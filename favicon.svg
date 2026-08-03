@@ -1,13 +1,49 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Heimdall favicon">
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_1" data-name="Capa 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 48 48">
   <defs>
-    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-      <stop offset="0%" stop-color="#1e293b"/>
-      <stop offset="100%" stop-color="#7c3aed"/>
+    <style>
+      .cls-1 {
+        fill: #fff;
+      }
+
+      .cls-2 {
+        fill: url(#Degradado_sin_nombre_2);
+      }
+
+      .cls-3 {
+        fill: #1b1464;
+      }
+    </style>
+    <linearGradient id="Degradado_sin_nombre_2" data-name="Degradado sin nombre 2" x1="18.96" y1="17.44" x2="28.47" y2="17.44" gradientTransform="translate(0 50) scale(1 -1)" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#eac654"/>
+      <stop offset=".06" stop-color="#e3c457"/>
+      <stop offset=".14" stop-color="#d2c15f"/>
+      <stop offset=".24" stop-color="#b5bb6d"/>
+      <stop offset=".35" stop-color="#8db281"/>
+      <stop offset=".46" stop-color="#5aa89b"/>
+      <stop offset=".54" stop-color="#32a0af"/>
+      <stop offset=".56" stop-color="#4696aa"/>
+      <stop offset=".59" stop-color="#608aa4"/>
+      <stop offset=".62" stop-color="#76809e"/>
+      <stop offset=".67" stop-color="#87789a"/>
+      <stop offset=".72" stop-color="#937398"/>
+      <stop offset=".79" stop-color="#9a6f96"/>
+      <stop offset="1" stop-color="#9c6f96"/>
     </linearGradient>
   </defs>
-
-  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#bg)"/>
-
-  <path d="M20 18.5v27h7.5v-10.5h9V45.5H44v-27h-7.5v10.5h-9V18.5H20Z" fill="#f8fafc"/>
-  <path d="M44 18.5l-9.5 27h7.2L51.2 18.5H44Z" fill="#a78bfa" opacity="0.95"/>
+  <rect class="cls-1" width="48" height="48"/>
+  <polygon id="Hoja_de_la_Espada" data-name="Hoja de la Espada" class="cls-2" points="23.76 45.15 18.96 35.8 18.96 19.96 28.47 19.96 28.47 35.8 23.76 45.15"/>
+  <polygon id="Empuñadura_Externa" data-name="Empuñadura Externa" class="cls-3" points="21.35 19.96 21.35 7.97 19.54 6.3 20.44 2.68 26.96 2.68 27.94 5.65 26.05 7.92 26.11 19.96 21.35 19.96"/>
+  <polyline id="Empuñadura_interna" data-name="Empuñadura interna" class="cls-1" points="24.58 19.96 24.58 7.27 26.58 5.49 26.23 4.03 21.28 4.03 20.93 5.49 22.93 7.27 22.93 19.96"/>
+  <polygon class="cls-1" points="24.54 39.91 26.86 35.31 26.86 21.44 24.54 21.44 24.54 39.91"/>
+  <polygon class="cls-1" points="22.93 39.91 20.61 35.31 20.61 21.44 22.93 21.44 22.93 39.91"/>
+  <path id="Linea_Derecha" data-name="Linea Derecha" class="cls-3" d="M37.94,45.12c-.38.1-.85-.04-1-.44-.2-6.05,0-35.28-.07-41.4,0-.23,0-.5.09-.68.16-.34.57-.47.92-.4.31.06.56.29.61.61.07,12.55,0,29.15.02,41.42,0,.17-.01.34-.08.49-.09.21-.28.35-.5.4h0Z"/>
+  <rect id="ESPACIO_BLANCO_PARA_ESCONDER_PARTE_DE_LA_ESPADA" data-name="ESPACIO BLANCO PARA ESCONDER PARTE DE LA ESPADA" class="cls-1" x="15.1" y="19.96" width="17.33" height="5.75"/>
+  <path id="LETRA_H" data-name="LETRA H" class="cls-3" d="M11.81,44.58c0,.74,1.65.79,1.65,0l.02-16.58c.07-1.61,2.77-3.69,3.32-3.62l13.87-.04c1.62-.31,2.82-1.15,3.21-1.81l.09,22.14c0,.66,1.57.75,1.57,0l-.02-41.88c.02-.83-1.63-.88-1.63,0l-.02,16.66c.02.98-1.83,2.77-3.23,3.21l-14.29.14c-1.01.12-1.99.84-2.88,1.79l-.03-21.81c.03-.88-1.65-.94-1.63,0v41.8Z"/>
+  <path id="Linea_Izquierda" data-name="Linea Izquierda" class="cls-3" d="M9.99,45.12c-.38.1-.85-.04-1-.44-.2-6.04,0-35.27-.07-41.4,0-.23,0-.5.09-.68.17-.33.57-.47.92-.39.31.06.56.29.61.61.07,12.55,0,29.15.02,41.42,0,.17,0,.34-.08.49-.09.21-.28.35-.5.4h.01Z"/>
+  <path id="Linea_Derecha-2" data-name="Linea Derecha-2" class="cls-3" d="M22.27,19.66c-.28-.26-.6-.6-.68-.74.32-.6,2.69-2.72,3.11-3.24.02-.02.04-.04.12.01.14.09.44.37.68.62.21.22.38.42.39.48-.91,1.02-2.22,2.25-3.14,3.21-.01.01-.04.02-.09-.02-.08-.05-.23-.17-.38-.32h0Z"/>
+  <path id="Linea_Derecha-3" data-name="Linea Derecha-3" class="cls-3" d="M22.2,15.99c-.28-.26-.6-.6-.68-.74.32-.6,2.69-2.72,3.11-3.24.02-.02.04-.04.12.01.14.09.44.37.68.62.21.22.38.42.39.48-.91,1.02-2.22,2.25-3.14,3.21-.01.01-.04.02-.09-.02-.08-.05-.23-.17-.38-.32h0Z"/>
+  <path id="Linea_Derecha-4" data-name="Linea Derecha-4" class="cls-3" d="M22.34,12.09c-.28-.26-.6-.6-.68-.74.32-.6,2.69-2.72,3.11-3.24.02-.02.04-.04.12.01.14.09.44.37.68.62.21.22.38.42.39.48-.91,1.02-2.22,2.25-3.14,3.21-.01.01-.04.02-.09-.02-.08-.05-.23-.17-.38-.32h0Z"/>
+  <path id="N_Inferior" data-name="N Inferior" class="cls-3" d="M15.01,44.58c0,.74,1.65.87,1.65,0v-15.98c-.01-.7.31-1.17,1.21-1.24h12.92v17.23c0,.75,1.65.74,1.65,0-.04-.87,0-18.88,0-18.88h-15.25c-.96.22-2.09,1.11-2.18,2.61.06,3.19,0,16.26,0,16.26Z"/>
+  <path id="N_Superior" data-name="N Superior" class="cls-3" d="M32.52,2.77c0-.74-1.65-.87-1.65,0v15.98c.01.7-.31,1.17-1.21,1.24h-12.91V2.76c0-.75-1.65-.74-1.65,0,.04.87,0,18.88,0,18.88h15.25c.96-.22,2.09-1.11,2.18-2.61-.06-3.19,0-16.26,0-16.26h-.01Z"/>
 </svg>
