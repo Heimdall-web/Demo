@@ -15,12 +15,11 @@
         --bg-soft: #111827;
         --panel: rgba(15, 23, 42, 0.7);
         --card: rgba(255, 255, 255, 0.08);
-        --border: rgba(255, 255, 255, 0.12);
-        --text: #e2e8f0;
-        --muted: #cbd5e1;
+        --border: rgba(255, 255, 255, 0.14);
+        --text: #f8fafc;
+        --muted: #e2e8f0;
         --accent: #8b5cf6;
         --accent-strong: #7c3aed;
-        --success: #22c55e;
         --error: #ef4444;
       }
 
@@ -70,26 +69,99 @@
       }
 
       .loading,
-      .error {
-        position: absolute;
+      .maintenance {
+        position: fixed;
         inset: 0;
-        z-index: 2;
+        z-index: 20;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex-direction: column;
-        gap: 1rem;
         text-align: center;
-        background: rgba(15, 23, 42, 0.82);
-        backdrop-filter: blur(4px);
-        transition: opacity 0.3s ease, visibility 0.3s ease;
+        background:
+          linear-gradient(rgba(15, 23, 42, 0.72), rgba(15, 23, 42, 0.78)),
+          url('https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
       }
 
       .loading.hidden,
-      .error.hidden {
+      .maintenance.hidden {
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
+      }
+
+      .maintenance-panel {
+        width: min(90vw, 720px);
+        padding: clamp(1.5rem, 4vw, 3rem);
+        border-radius: 24px;
+        background: rgba(15, 23, 42, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+      }
+
+      .maintenance-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 1rem;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-size: 2rem;
+        background: rgba(239, 68, 68, 0.12);
+        border: 1px solid rgba(239, 68, 68, 0.45);
+      }
+
+      .maintenance-title {
+        margin: 0 0 1rem;
+        font-size: clamp(1.7rem, 3vw, 2.8rem);
+        line-height: 1.1;
+        font-weight: 800;
+        color: var(--text);
+      }
+
+      .maintenance-message {
+        margin: 0 auto;
+        max-width: 620px;
+        font-size: clamp(1rem, 1.7vw, 1.3rem);
+        line-height: 1.6;
+        color: var(--muted);
+      }
+
+      .recargar-btn {
+        margin-top: 1.7rem;
+        border: none;
+        border-radius: 999px;
+        padding: 0.95rem 1.6rem;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
+        color: white;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 12px 28px rgba(124, 58, 237, 0.35);
+      }
+
+      .recargar-btn:hover,
+      .recargar-btn:focus-visible {
+        transform: translateY(-1px);
+      }
+
+      .error-reason {
+        position: fixed;
+        right: max(1rem, env(safe-area-inset-right));
+        bottom: max(1rem, env(safe-area-inset-bottom));
+        z-index: 30;
+        max-width: min(80vw, 420px);
+        padding: 0.5rem 0.7rem;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: rgba(255, 255, 255, 0.82);
+        font-size: 0.68rem;
+        line-height: 1.35;
+        letter-spacing: 0.02em;
+        backdrop-filter: blur(6px);
       }
 
       .spinner {
@@ -107,60 +179,23 @@
         }
       }
 
-      .loading-title,
-      .error-title {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 700;
-      }
-
-      .loading-text,
-      .error-text {
-        margin: 0;
-        max-width: 28rem;
-        color: var(--muted);
-        font-size: 0.95rem;
-        line-height: 1.5;
-      }
-
-      .fullscreen-btn {
-        position: absolute;
-        right: max(1rem, env(safe-area-inset-right));
-        bottom: max(1rem, env(safe-area-inset-bottom));
-        z-index: 3;
-        border: 1px solid var(--border);
-        background: rgba(15, 23, 42, 0.82);
-        color: var(--text);
-        border-radius: 999px;
-        padding: 0.75rem 1rem;
-        font-size: 0.9rem;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
-        transition: transform 0.2s ease, background 0.2s ease;
-      }
-
-      .fullscreen-btn:hover,
-      .fullscreen-btn:focus-visible {
-        background: rgba(35, 46, 72, 0.9);
-        transform: translateY(-1px);
-      }
-
       @media (max-width: 640px) {
-        .loading-title,
-        .error-title {
+        .maintenance-panel {
+          padding: 1.25rem 1rem;
+          border-radius: 18px;
+        }
+
+        .maintenance-title {
+          font-size: 1.7rem;
+        }
+
+        .maintenance-message {
           font-size: 1rem;
         }
 
-        .loading-text,
-        .error-text {
-          font-size: 0.82rem;
-          padding: 0 1.25rem;
-        }
-
-        .fullscreen-btn {
-          padding: 0.7rem 0.9rem;
-          font-size: 0.8rem;
+        .recargar-btn {
+          width: 100%;
+          font-size: 0.95rem;
         }
       }
     </style>
@@ -180,64 +215,78 @@
       </div>
 
       <div id="loading" class="loading" aria-live="polite">
-        <div class="spinner" aria-hidden="true"></div>
-        <p class="loading-title">Cargando contenido…</p>
-        <p class="loading-text">Estamos preparando la vista para que puedas acceder al contenido sin interrupciones.</p>
+        <div class="maintenance-panel">
+          <div class="spinner" aria-hidden="true"></div>
+          <p class="maintenance-title" style="margin-top: 1rem;">Cargando contenido…</p>
+          <p class="maintenance-message">Estamos preparando la vista para que puedas acceder al contenido sin interrupciones.</p>
+        </div>
       </div>
 
-      <div id="error" class="error hidden" aria-live="assertive">
-        <p class="error-title">No se pudo cargar el contenido</p>
-        <p class="error-text">La página externa no respondió a tiempo. Intenta recargar la vista o revisa tu conexión.</p>
+      <div id="maintenance" class="maintenance hidden" aria-live="assertive">
+        <div class="maintenance-panel">
+          <div class="maintenance-icon" aria-hidden="true">⚠️</div>
+          <h1 class="maintenance-title">¡Volveremos pronto!</h1>
+          <p class="maintenance-message">
+            Estamos realizando mejoras para ofrecerte una mejor experiencia. El sitio estará disponible nuevamente lo más pronto posible.
+          </p>
+          <button id="reloadBtn" class="recargar-btn" type="button">Recargar</button>
+        </div>
       </div>
 
-      <button id="fullscreenBtn" class="fullscreen-btn" type="button" aria-label="Activar pantalla completa">
-        Pantalla completa
-      </button>
+      <div id="errorReason" class="error-reason">Motivo: 401 · Error de acceso / formato incorrecto</div>
     </div>
 
     <script>
       const iframe = document.getElementById('contentFrame');
       const loading = document.getElementById('loading');
-      const error = document.getElementById('error');
-      const fullscreenBtn = document.getElementById('fullscreenBtn');
+      const maintenance = document.getElementById('maintenance');
+      const reloadBtn = document.getElementById('reloadBtn');
+      const errorReason = document.getElementById('errorReason');
 
       let iframeLoaded = false;
 
-      const hideLoading = () => {
+      const showMaintenance = (reasonText = '401 · Error de acceso / formato incorrecto') => {
+        errorReason.textContent = 'Motivo: ' + reasonText;
+        loading.classList.add('hidden');
+        maintenance.classList.remove('hidden');
+      };
+
+      const hideMaintenance = () => {
         iframeLoaded = true;
         loading.classList.add('hidden');
+        maintenance.classList.add('hidden');
       };
 
-      const showError = () => {
-        if (!iframeLoaded) {
-          loading.classList.add('hidden');
-          error.classList.remove('hidden');
+      iframe.addEventListener('load', () => {
+        try {
+          const doc = iframe.contentDocument || iframe.contentWindow?.document;
+          if (doc && doc.body) {
+            const text = (doc.body.innerText || '').toLowerCase();
+            if (text.includes('401') || text.includes('se trata de un error') || text.includes('no puede procesar la solicitud')) {
+              showMaintenance('401 · Error de acceso / formato incorrecto');
+              return;
+            }
+          }
+        } catch (e) {
+          // El contenido es de otro origen, así que no se puede inspeccionar.
         }
-      };
 
-      iframe.addEventListener('load', hideLoading);
-      iframe.addEventListener('error', showError);
+        hideMaintenance();
+      });
+
+      iframe.addEventListener('error', () => {
+        showMaintenance('401 · Error de acceso / formato incorrecto');
+      });
+
+      reloadBtn.addEventListener('click', () => {
+        window.location.reload();
+      });
 
       setTimeout(() => {
         if (!iframeLoaded) {
-          showError();
+          showMaintenance('401 · Error de acceso / formato incorrecto');
         }
       }, 12000);
-
-      fullscreenBtn.addEventListener('click', async () => {
-        try {
-          if (document.fullscreenElement) {
-            await document.exitFullscreen();
-            return;
-          }
-
-          if (document.documentElement.requestFullscreen) {
-            await document.documentElement.requestFullscreen();
-          }
-        } catch (err) {
-          console.error('No se pudo activar la pantalla completa:', err);
-        }
-      });
     </script>
   </body>
 </html>
