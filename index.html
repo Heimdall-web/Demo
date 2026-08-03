@@ -48,7 +48,7 @@
         position: relative;
         width: 100vw;
         height: 100dvh;
-        height: 100vh;
+        min-height: 100vh;
         background: linear-gradient(135deg, var(--bg) 0%, var(--bg-soft) 100%);
         padding:
           max(0px, env(safe-area-inset-top))
@@ -61,6 +61,8 @@
         position: absolute;
         inset: 0;
         background: #ffffff;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
       }
 
       iframe {
@@ -197,6 +199,11 @@
       }
 
       @media (max-width: 640px) {
+        .app-shell {
+          min-height: 100vh;
+          height: 100dvh;
+        }
+
         .maintenance-panel {
           padding: 1.25rem 1rem;
           border-radius: 18px;
