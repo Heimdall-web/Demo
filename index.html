@@ -51,6 +51,7 @@
         width: 100vw;
         height: var(--app-height);
         min-height: 100vh;
+        overflow: hidden;
         background: linear-gradient(135deg, var(--bg) 0%, var(--bg-soft) 100%);
         padding:
           max(0px, env(safe-area-inset-top))
@@ -65,22 +66,24 @@
         background: #ffffff;
         padding-top: env(safe-area-inset-top);
         padding-bottom: env(safe-area-inset-bottom);
+        overflow: hidden;
       }
 
       iframe {
         display: block;
         width: 100%;
         height: 100%;
+        min-height: 100%;
         border: 0;
         background: #ffffff;
       }
 
       .loading,
       .maintenance {
-        position: fixed;
+        position: absolute;
         inset: 0;
-        width: 100vw;
-        height: var(--app-height);
+        width: 100%;
+        height: 100%;
         z-index: 20;
         display: flex;
         align-items: center;
