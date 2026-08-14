@@ -35,7 +35,9 @@
       body {
         margin: 0;
         width: 100%;
-        height: 100%;
+        /* height:100% usaría lvh en Android → overflow de 56 px bajo nav bar.
+           Usamos min-height:100dvh para respetar el viewport visible real.    */
+        min-height: 100dvh;
         background: var(--bg);
         color: var(--text);
         font-family: Arial, Helvetica, sans-serif;
@@ -49,8 +51,11 @@
       .app-shell {
         position: relative;
         width: 100vw;
+        /* --app-height se sincroniza con window.innerHeight vía JS (= dvh real).
+           min-height usa 100dvh (viewport dinámico) en lugar de 100vh (= lvh en
+           Android con barra de navegación) para evitar el desbordamiento de 56 px. */
         height: var(--app-height);
-        min-height: 100vh;
+        min-height: 100dvh;
         background: linear-gradient(135deg, var(--bg) 0%, var(--bg-soft) 100%);
         padding:
           max(0px, env(safe-area-inset-top))
@@ -468,7 +473,9 @@
 
       @media (max-width: 640px) {
         .app-shell {
-          min-height: 100vh;
+          /* dvh excluye barra de navegación de Android; 100vh la incluye (= 752 px).
+             Usar dvh aquí también para ser consistente con la regla base. */
+          min-height: 100dvh;
           height: 100dvh;
         }
 
@@ -808,12 +815,21 @@
         function onBarcodeDetected(code) {
           console.log('[Scanner] Código detectado:', code);
           closeModal();
-          // Send to iframe
+          // Send to iframe — se restringe el origin al dominio de Google Script
+          // para evitar que scripts de terceros intercepten el mensaje.
+          var GAS_ORIGIN = 'https://script.google.com';
           var iframeEl = document.getElementById('contentFrame');
           if (iframeEl && iframeEl.contentWindow) {
             try {
-              iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, '*');
-            } catch(e) { console.error('[Scanner] postMessage error', e); }
+              iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, GAS_ORIGIN);
+            } catch(e) {
+              // Si el origin falla (ej. redirección de GAS a script.googleusercontent.com)
+              // reintentamos con '*' como fallback, logueando el intento.
+              console.warn('[Scanner] postMessage con origin restringido falló, usando fallback:', e);
+              try { iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, '*'); } catch(e2) {
+                console.error('[Scanner] postMessage fallback error', e2);
+              }
+            }
           }
         }
 
