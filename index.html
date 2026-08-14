@@ -497,6 +497,144 @@
           font-size: 0.95rem;
         }
       }
+
+      /* ── Photo Camera Modal ── */
+      #photoCameraModal {
+        position: fixed;
+        inset: 0;
+        z-index: 9998;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      #photoCameraModal.hidden { display: none !important; }
+
+      #photoCameraVideo {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        background: #000;
+      }
+
+      .photo-top-row {
+        position: absolute;
+        top: max(12px, env(safe-area-inset-top));
+        left: max(12px, env(safe-area-inset-left));
+        right: max(12px, env(safe-area-inset-right));
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        pointer-events: auto;
+        z-index: 2;
+      }
+      .photo-cam-title {
+        color: #fff;
+        font-size: 17px;
+        font-weight: 700;
+        text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+      }
+
+      /* Circular viewfinder guide */
+      .photo-guide-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(72vw, 320px);
+        height: min(72vw, 320px);
+        border: 2px dashed rgba(255,255,255,0.75);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 1;
+      }
+      .photo-guide-label {
+        position: absolute;
+        top: calc(50% + min(38vw, 172px));
+        left: 50%;
+        transform: translateX(-50%);
+        color: rgba(255,255,255,0.9);
+        font-size: 14px;
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.7);
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 1;
+      }
+
+      /* Shutter button row */
+      .photo-bottom-row {
+        position: absolute;
+        bottom: max(28px, env(safe-area-inset-bottom));
+        left: 0;
+        right: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 32px;
+        pointer-events: auto;
+        z-index: 2;
+      }
+      .photo-shutter-btn {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        background: rgba(255,255,255,0.9);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+        transition: transform 0.12s ease, filter 0.12s ease;
+      }
+      .photo-shutter-btn:active { transform: scale(0.92); filter: brightness(0.85); }
+      .photo-shutter-btn svg { display: block; width: 32px; height: 32px; fill: #333; }
+
+      .photo-cam-cycle-btn {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.5);
+        background: rgba(0,0,0,0.4);
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .photo-cam-cycle-btn svg { display: block; width: 22px; height: 22px; fill: currentColor; }
+
+      #photoCamMsg {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        text-align: center;
+        color: rgba(255,255,255,0.9);
+        font-size: 15px;
+        font-weight: 500;
+        line-height: 1.6;
+        z-index: 3;
+        background: rgba(0,0,0,0.7);
+      }
+      #photoCamMsg.hidden { display: none !important; }
+
+      /* Flash animation on capture */
+      #photoCamFlash {
+        position: absolute;
+        inset: 0;
+        background: #fff;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 10;
+        transition: opacity 0.06s ease;
+      }
+      #photoCamFlash.flash { opacity: 0.85; }
     </style>
   </head>
   <body>
@@ -504,7 +642,7 @@
       <div class="iframe-wrap">
         <iframe
           id="contentFrame"
-          src="https://script.google.com/macros/s/AKfycbykhd17bzZEvOaoyvBaFRUuVc2MHUBKWuQlnjnyH1oknEwMzVfEaGwskNMHhLDNXLU/exec"
+          src="https://script.google.com/macros/s/AKfycbxqALVjIDB-0M5qNJd65Hg6m33zSsQqFBdt-bN6-G6Iq52sGVyTq1ZCGOS7zC8eBdE/exec"
           title="Contenido principal"
           loading="eager"
           allow="fullscreen; geolocation; microphone; camera"
@@ -592,6 +730,42 @@
           <button class="btn-ok" id="scannerManualOk" type="button">Aceptar</button>
         </div>
       </div>
+    </div>
+
+    <!-- ── Photo Camera Modal (lives in shell page, sends result to GAS iframe via postMessage) ── -->
+    <div id="photoCameraModal" class="hidden" role="dialog" aria-modal="true" aria-label="Tomar foto de perfil">
+      <video id="photoCameraVideo" autoplay playsinline muted></video>
+      <div id="photoCamFlash"></div>
+
+      <!-- top row: title + close + camera select -->
+      <div class="photo-top-row">
+        <span class="photo-cam-title">Tomar foto de perfil</span>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="photoCamSelect" class="scanner-cam-select" title="Seleccionar cámara" aria-label="Seleccionar cámara" style="max-width:130px;"></select>
+          <button class="scanner-icon-btn" id="photoCamCloseBtn" type="button" title="Cancelar" aria-label="Cancelar">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><line x1="4" y1="4" x2="20" y2="20" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/><line x1="20" y1="4" x2="4" y2="20" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- circular guide ring -->
+      <div class="photo-guide-ring" aria-hidden="true"></div>
+      <p class="photo-guide-label" aria-hidden="true">Centra tu rostro en el círculo</p>
+
+      <!-- bottom row: cycle + shutter + spacer -->
+      <div class="photo-bottom-row">
+        <button class="photo-cam-cycle-btn" id="photoCamCycleBtn" type="button" title="Cambiar cámara" aria-label="Cambiar cámara">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 5h-3.17l-1.84-2H9.01L7.17 5H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2zm-8 13a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/><path d="M12 10l-4 4h3v4h2v-4h3l-4-4z"/></svg>
+        </button>
+        <button class="photo-shutter-btn" id="photoCamShutterBtn" type="button" title="Tomar foto" aria-label="Tomar foto">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="8" fill="#333"/><circle cx="12" cy="12" r="5" fill="#fff"/></svg>
+        </button>
+        <!-- spacer to visually center shutter -->
+        <div style="width:46px;height:46px;" aria-hidden="true"></div>
+      </div>
+
+      <!-- error/status message -->
+      <div id="photoCamMsg" class="hidden" role="alert"></div>
     </div>
 
     <script>
@@ -908,13 +1082,170 @@
       })();
       // ── End Barcode Scanner ──
 
+      // ── Photo Camera ── (opens full-screen camera to capture a profile photo;
+      //    triggered by OPEN_PHOTO_CAMERA postMessage from the GAS iframe;
+      //    captured JPEG is sent back as PHOTO_CAPTURE_RESULT postMessage)
+      (function () {
+        'use strict';
+
+        var _pcStream   = null;
+        var _pcDevices  = [];
+        var _pcDevIdx   = 0;
+        var _pcRunning  = false;
+
+        var modal      = document.getElementById('photoCameraModal');
+        var video      = document.getElementById('photoCameraVideo');
+        var msgEl      = document.getElementById('photoCamMsg');
+        var flash      = document.getElementById('photoCamFlash');
+        var closeBtn   = document.getElementById('photoCamCloseBtn');
+        var shutterBtn = document.getElementById('photoCamShutterBtn');
+        var cycleBtn   = document.getElementById('photoCamCycleBtn');
+        var camSel     = document.getElementById('photoCamSelect');
+
+        function pcShowMsg(text) { msgEl.textContent = text; msgEl.classList.remove('hidden'); }
+        function pcHideMsg()     { msgEl.classList.add('hidden'); }
+
+        function pcStopStream() {
+          _pcRunning = false;
+          if (_pcStream) { _pcStream.getTracks().forEach(function(t){ try{t.stop();}catch(e){} }); _pcStream = null; }
+          try { video.srcObject = null; } catch(e){}
+        }
+
+        function pcClose() {
+          pcStopStream();
+          modal.classList.add('hidden');
+        }
+
+        async function pcOpen() {
+          modal.classList.remove('hidden');
+          pcHideMsg();
+          _pcRunning = true;
+
+          // 1. Request camera permission
+          try {
+            await navigator.mediaDevices.getUserMedia({ video: true });
+          } catch(e) {
+            var msg = 'No se pudo acceder a la cámara.';
+            if (e && (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'))
+              msg = 'Permiso de cámara denegado. Toca 🔒 en la barra de dirección y selecciona "Permitir".';
+            else if (e && (e.name === 'NotFoundError' || e.name === 'DevicesNotFoundError'))
+              msg = 'No se encontró ninguna cámara en este dispositivo.';
+            else if (e && e.message) msg = 'Error de cámara: ' + e.message;
+            pcShowMsg(msg);
+            _pcRunning = false;
+            return;
+          }
+
+          // 2. Enumerate devices
+          try {
+            var devs = await navigator.mediaDevices.enumerateDevices();
+            _pcDevices = devs.filter(function(d){ return d.kind === 'videoinput'; });
+            camSel.innerHTML = '';
+            _pcDevices.forEach(function(d, i){
+              var opt = document.createElement('option');
+              opt.value = d.deviceId;
+              opt.textContent = d.label || ('Cámara ' + (i + 1));
+              camSel.appendChild(opt);
+            });
+            // Prefer front camera for selfie
+            var front = _pcDevices.find(function(d){ return /front|frontal|user|selfie/i.test(d.label || ''); });
+            _pcDevIdx = front ? _pcDevices.indexOf(front) : 0;
+            if (_pcDevices[_pcDevIdx]) camSel.value = _pcDevices[_pcDevIdx].deviceId;
+          } catch(e) { console.warn('[PhotoCam] enumerateDevices failed', e); }
+
+          // 3. Start stream
+          await pcStartStream(_pcDevices[_pcDevIdx] ? _pcDevices[_pcDevIdx].deviceId : undefined);
+        }
+
+        async function pcStartStream(deviceId) {
+          if (_pcStream) { _pcStream.getTracks().forEach(function(t){ try{t.stop();}catch(e){} }); _pcStream = null; }
+          var constraints = { video: { width: { ideal: 1280 }, height: { ideal: 1280 }, facingMode: 'user' } };
+          if (deviceId) constraints.video.deviceId = { ideal: deviceId };
+          try {
+            _pcStream = await navigator.mediaDevices.getUserMedia(constraints);
+          } catch(e) {
+            try { _pcStream = await navigator.mediaDevices.getUserMedia({ video: true }); }
+            catch(e2) { pcShowMsg('No se pudo iniciar la cámara: ' + (e2 && e2.message ? e2.message : String(e2))); throw e2; }
+          }
+          video.srcObject = _pcStream;
+          try { video.play().catch(function(){}); } catch(e){}
+        }
+
+        function pcCycleCamera() {
+          if (!_pcDevices.length) return;
+          _pcDevIdx = (_pcDevIdx + 1) % _pcDevices.length;
+          var newId = _pcDevices[_pcDevIdx].deviceId;
+          camSel.value = newId;
+          pcStartStream(newId).catch(function(e){ pcShowMsg('Error al cambiar cámara: ' + (e && e.message ? e.message : String(e))); });
+        }
+
+        function pcCapture() {
+          if (!_pcStream || !video.srcObject) { pcShowMsg('La cámara no está activa.'); return; }
+          // Flash effect
+          flash.classList.add('flash');
+          setTimeout(function(){ flash.classList.remove('flash'); }, 150);
+
+          // Draw current frame to canvas and export as JPEG
+          var canvas = document.createElement('canvas');
+          var vw = video.videoWidth  || 800;
+          var vh = video.videoHeight || 800;
+          // Crop to square (center crop)
+          var side = Math.min(vw, vh);
+          canvas.width  = 800;
+          canvas.height = 800;
+          var ctx = canvas.getContext('2d');
+          var sx = Math.floor((vw - side) / 2);
+          var sy = Math.floor((vh - side) / 2);
+          ctx.drawImage(video, sx, sy, side, side, 0, 0, 800, 800);
+          var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+          // Close camera
+          pcClose();
+
+          // Send to all nested GAS frames
+          var msg = { type: 'PHOTO_CAPTURE_RESULT', data: dataUrl };
+          function broadcastToFrame(win) {
+            try { win.postMessage(msg, '*'); } catch(e) {}
+            try { for (var i = 0; i < win.frames.length; i++) broadcastToFrame(win.frames[i]); } catch(e){}
+          }
+          var iframeEl = document.getElementById('contentFrame');
+          if (iframeEl && iframeEl.contentWindow) broadcastToFrame(iframeEl.contentWindow);
+        }
+
+        // Event listeners
+        closeBtn.addEventListener('click', pcClose);
+        shutterBtn.addEventListener('click', pcCapture);
+        cycleBtn.addEventListener('click', pcCycleCamera);
+        camSel.addEventListener('change', function() {
+          var newId = camSel.value; if (!newId) return;
+          _pcDevIdx = _pcDevices.findIndex(function(d){ return d.deviceId === newId; });
+          if (_pcDevIdx < 0) _pcDevIdx = 0;
+          pcStartStream(newId).catch(function(e){ pcShowMsg('Error: ' + (e && e.message ? e.message : String(e))); });
+        });
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape' && !modal.classList.contains('hidden')) pcClose();
+        });
+
+        // Receive OPEN_PHOTO_CAMERA from GAS iframe
+        window.addEventListener('message', function(event) {
+          try {
+            if (!event || !event.data) return;
+            if (event.data.type !== 'OPEN_PHOTO_CAMERA') return;
+            console.log('[PhotoCam] OPEN_PHOTO_CAMERA recibido — abriendo cámara de foto');
+            pcOpen();
+          } catch(e) { console.error('[PhotoCam] message handler error', e); }
+        });
+
+      })();
+      // ── End Photo Camera ──
+
       const iframe = document.getElementById('contentFrame');
       const loading = document.getElementById('loading');
       const maintenance = document.getElementById('maintenance');
       const reloadBtn = document.getElementById('reloadBtn');
       const openRemoteBtn = document.getElementById('openRemoteBtn');
       const errorReason = document.getElementById('errorReason');
-      const remoteUrl = iframe?.getAttribute('src') || 'https://script.google.com/macros/s/AKfycbykhd17bzZEvOaoyvBaFRUuVc2MHUBKWuQlnjnyH1oknEwMzVfEaGwskNMHhLDNXLU/exec';
+      const remoteUrl = iframe?.getAttribute('src') || 'https://script.google.com/macros/s/AKfycbxqALVjIDB-0M5qNJd65Hg6m33zSsQqFBdt-bN6-G6Iq52sGVyTq1ZCGOS7zC8eBdE/exec';
 
       const syncViewportHeight = () => {
         const height = window.innerHeight || document.documentElement.clientHeight || screen.height;
