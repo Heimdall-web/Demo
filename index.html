@@ -1,4 +1,18 @@
 <!DOCTYPE html>
+<!--
+╔══════════════════════════════════════════════════════════╗
+║              CONFIGURACIÓN DE ENLACES                    ║
+╠══════════════════════════════════════════════════════════╣
+║  PRIMARY_URL  → URL principal cargada en el iframe.      ║
+║  FALLBACK_URL → URL de respaldo. Si la dejas vacía ('')  ║
+║                 se mostrará la pantalla de mantenimiento  ║
+║                 en lugar de redirigir al respaldo.        ║
+╚══════════════════════════════════════════════════════════╝
+-->
+<script>
+  var PRIMARY_URL  = 'https://script.google.com/macros/s/AKfycbwalq2wl3TlWbjvz9iZvbH0W55Bc707lLcAoEIxD56AXMBmdnTTFDkBECSvaop2iP4/exec';
+  var FALLBACK_URL = '';
+</script>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -642,7 +656,6 @@
       <div class="iframe-wrap">
         <iframe
           id="contentFrame"
-          src="https://script.google.com/macros/s/AKfycby9-Np-zoR9hZ5ms1z38Cgqe0E3L9tWWfTqm2Je5TZFx59_V9inWxIfdQ46LSpFJpM/exec"
           title="Contenido principal"
           loading="eager"
           allow="fullscreen; geolocation; microphone; camera"
@@ -1270,7 +1283,12 @@
       const reloadBtn = document.getElementById('reloadBtn');
       const openRemoteBtn = document.getElementById('openRemoteBtn');
       const errorReason = document.getElementById('errorReason');
-      const remoteUrl = iframe?.getAttribute('src') || 'https://script.google.com/macros/s/AKfycby9-Np-zoR9hZ5ms1z38Cgqe0E3L9tWWfTqm2Je5TZFx59_V9inWxIfdQ46LSpFJpM/exec';
+      // URLs tomadas de la sección de configuración al inicio del archivo.
+      const primaryUrl  = (typeof PRIMARY_URL  !== 'undefined' && PRIMARY_URL)  ? PRIMARY_URL  : '';
+      const fallbackUrl = (typeof FALLBACK_URL !== 'undefined' && FALLBACK_URL) ? FALLBACK_URL : '';
+      const remoteUrl   = primaryUrl;
+      // Inyectar la URL principal en el iframe.
+      if (iframe && primaryUrl) iframe.src = primaryUrl;
 
       const syncViewportHeight = () => {
         const height = window.innerHeight || document.documentElement.clientHeight || screen.height;
@@ -1357,14 +1375,24 @@
         hideMaintenance();
       });
 
+      // Si hay URL de respaldo y el iframe falla, redirigir automáticamente al respaldo.
       iframe.addEventListener('error', () => {
         clearIframeTimeout();
-        showMaintenance('No se pudo cargar el contenido remoto.');
+        if (fallbackUrl) {
+          iframe.src = fallbackUrl;
+        } else {
+          showMaintenance('No se pudo cargar el contenido remoto.');
+        }
       });
 
       iframeTimeoutId = window.setTimeout(() => {
         if (!iframeLoaded && !hasShownMaintenance) {
-          showMaintenance('El contenido remoto no respondió a tiempo.');
+          if (fallbackUrl) {
+            // Timeout: redirigir al respaldo en lugar de mostrar mantenimiento.
+            iframe.src = fallbackUrl;
+          } else {
+            showMaintenance('El contenido remoto no respondió a tiempo.');
+          }
         }
       }, maintenanceTimeoutMs);
 
@@ -1373,7 +1401,9 @@
       });
 
       openRemoteBtn.addEventListener('click', () => {
-        window.open(remoteUrl, '_blank', 'noopener,noreferrer');
+        // Si hay respaldo y el primario ya falló, abrir el respaldo; si no, abrir el primario.
+        const target = (fallbackUrl && hasShownMaintenance) ? fallbackUrl : remoteUrl;
+        window.open(target, '_blank', 'noopener,noreferrer');
       });
     </script>
   </body>
