@@ -815,20 +815,37 @@
         function onBarcodeDetected(code) {
           console.log('[Scanner] Código detectado:', code);
           closeModal();
-          // GAS sirve el contenido final desde script.googleusercontent.com, no desde
-          // script.google.com. postMessage con targetOrigin restringido se descarta
-          // silenciosamente (sin lanzar excepción) cuando el origin real del iframe no
-          // coincide, por lo que el fallback en el catch nunca se ejecutaba.
-          // Usar '*' es seguro: el receptor en index.html de GAS valida
-          // event.data.type === 'BARCODE_SCAN' antes de procesar cualquier mensaje.
+          // ── PROBLEMA REAL ──────────────────────────────────────────────────────
+          // Google Apps Script NO sirve el contenido directamente en el iframe que
+          // apunta a script.google.com. En cambio, script.google.com crea un SEGUNDO
+          // iframe anidado dentro de sí mismo apuntando a:
+          //   n-XXXX-script.googleusercontent.com/userCodeAppPanel
+          // Es AHÍ donde vive el window.addEventListener('message',...) del catálogo.
+          //
+          // postMessage sólo llega a la ventana destino DIRECTA — no se propaga hacia
+          // iframes hijos. Por eso contentFrame.contentWindow.postMessage() nunca
+          // alcanzaba el listener del catálogo.
+          //
+          // Solución: enviar el mensaje a TODOS los frames anidados recursivamente.
+          // ──────────────────────────────────────────────────────────────────────
+          var msg = { type: 'BARCODE_SCAN', value: code };
+
+          function broadcastToFrame(win) {
+            try { win.postMessage(msg, '*'); } catch(e) {}
+            try {
+              for (var i = 0; i < win.frames.length; i++) {
+                broadcastToFrame(win.frames[i]);
+              }
+            } catch(e) {}
+          }
+
+          // Send to contentFrame and all its nested iframes
           var iframeEl = document.getElementById('contentFrame');
           if (iframeEl && iframeEl.contentWindow) {
-            try {
-              iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, '*');
-            } catch(e) {
-              console.error('[Scanner] postMessage error', e);
-            }
+            broadcastToFrame(iframeEl.contentWindow);
           }
+          // Also send to every top-level frame in case GAS opens in a new context
+          try { broadcastToFrame(window); } catch(e) {}
         }
 
         // Camera cycle
