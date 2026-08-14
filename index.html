@@ -504,7 +504,7 @@
       <div class="iframe-wrap">
         <iframe
           id="contentFrame"
-          src="https://script.google.com/macros/s/AKfycbzhwLb9OPY9wxwbEWoTiCqLB-rtB7Nu4hn1wXl95aa1o24ncRjkNbvIrx24TEgYOJk/exec"
+          src="https://script.google.com/macros/s/AKfycbzQ5povud7Cft09ACsnJP3gYKDXPE_K2jH4eyHCksRHH_lV95Bm3N4qdinUCcTWBCM/exec"
           title="Contenido principal"
           loading="eager"
           allow="fullscreen; geolocation; microphone; camera"
@@ -537,8 +537,8 @@
       <div id="errorReason" class="error-reason hidden" aria-live="polite">Motivo: 401 · Error de acceso / formato incorrecto</div>
     </div>
 
-    <!-- ── Barcode scanner FAB ── -->
-    <button class="scanner-fab" id="scannerFab" type="button" title="Lector de código de barras" aria-label="Abrir lector de código de barras" style="display:none">
+    <!-- ── Barcode scanner FAB (oculto permanentemente — el botón vive dentro del buscador de la app GAS) ── -->
+    <button class="scanner-fab" id="scannerFab" type="button" title="Lector de código de barras" aria-label="Abrir lector de código de barras" style="display:none!important;pointer-events:none;visibility:hidden;">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <path d="M2 4h2v16H2V4zm3 0h1v16H5V4zm2 0h3v16H7V4zm4 0h1v16h-1V4zm2 0h2v16h-2V4zm3 0h1v16h-1V4zm2 0h2v16h-2V4z"/>
       </svg>
@@ -815,22 +815,22 @@
         function onBarcodeDetected(code) {
           console.log('[Scanner] Código detectado:', code);
           closeModal();
-          // Send to iframe — se restringe el origin al dominio de Google Script
-          // para evitar que scripts de terceros intercepten el mensaje.
+          // Reenviar al iframe con el campo de destino que la app GAS indicó al abrir el escáner.
+          // _scannerTargetFieldId se establece cuando la app GAS envía OPEN_SCANNER via postMessage.
           var GAS_ORIGIN = 'https://script.google.com';
           var iframeEl = document.getElementById('contentFrame');
           if (iframeEl && iframeEl.contentWindow) {
+            var payload = { type: 'BARCODE_SCAN', value: code, targetFieldId: (_scannerTargetFieldId || 'search') };
             try {
-              iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, GAS_ORIGIN);
+              iframeEl.contentWindow.postMessage(payload, GAS_ORIGIN);
             } catch(e) {
-              // Si el origin falla (ej. redirección de GAS a script.googleusercontent.com)
-              // reintentamos con '*' como fallback, logueando el intento.
               console.warn('[Scanner] postMessage con origin restringido falló, usando fallback:', e);
-              try { iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, '*'); } catch(e2) {
+              try { iframeEl.contentWindow.postMessage(payload, '*'); } catch(e2) {
                 console.error('[Scanner] postMessage fallback error', e2);
               }
             }
           }
+          _scannerTargetFieldId = 'search'; // resetear al default
         }
 
         // Camera cycle
@@ -890,8 +890,39 @@
           }
         });
 
+        // Exponer openModal al exterior para que el canal postMessage de la página lo invoque
+        fab._openModal = openModal;
+        window._openDemoScanner = openModal;
+
       })();
       // ── End Barcode Scanner ──
+
+      // ── Canal de comunicación bidireccional con la app GAS ──
+      // La app GAS envía OPEN_SCANNER con el id del campo de destino,
+      // Demo abre el escáner y devuelve BARCODE_SCAN con targetFieldId.
+      var _scannerTargetFieldId = 'search';
+
+      window.addEventListener('message', function(event) {
+        try {
+          if (!event || !event.data) return;
+          // Validar que viene de Google Script (o script.googleusercontent.com)
+          var origin = event.origin || '';
+          var isGAS = origin === 'https://script.google.com' ||
+                      origin.endsWith('.googleusercontent.com') ||
+                      origin === 'null'; // algunos navegadores reportan "null" para GAS
+          if (!isGAS) return;
+
+          if (event.data.type === 'OPEN_SCANNER') {
+            // La app GAS pide abrir el escáner para un campo específico
+            _scannerTargetFieldId = (event.data.targetFieldId || 'search').toString().trim();
+            console.log('[Demo] OPEN_SCANNER recibido, targetFieldId:', _scannerTargetFieldId);
+            // Llamar directamente a la función expuesta por el IIFE del scanner
+            if (typeof window._openDemoScanner === 'function') {
+              window._openDemoScanner();
+            }
+          }
+        } catch(e) { console.error('[Demo] message handler error', e); }
+      });
 
       const iframe = document.getElementById('contentFrame');
       const loading = document.getElementById('loading');
@@ -899,7 +930,7 @@
       const reloadBtn = document.getElementById('reloadBtn');
       const openRemoteBtn = document.getElementById('openRemoteBtn');
       const errorReason = document.getElementById('errorReason');
-      const remoteUrl = iframe?.getAttribute('src') || 'https://script.google.com/macros/s/AKfycbzhwLb9OPY9wxwbEWoTiCqLB-rtB7Nu4hn1wXl95aa1o24ncRjkNbvIrx24TEgYOJk/exec';
+      const remoteUrl = iframe?.getAttribute('src') || 'https://script.google.com/macros/s/AKfycbzQ5povud7Cft09ACsnJP3gYKDXPE_K2jH4eyHCksRHH_lV95Bm3N4qdinUCcTWBCM/exec';
 
       const syncViewportHeight = () => {
         const height = window.innerHeight || document.documentElement.clientHeight || screen.height;
@@ -940,7 +971,8 @@
         errorReason.classList.add('hidden');
         loading.classList.add('hidden');
         maintenance.classList.add('hidden');
-        scannerFab.style.display = 'flex';
+        // El FAB ya no se muestra — los botones viven en la app GAS directamente.
+        // scannerFab.style.display = 'flex'; ← removido
       };
 
       const detectExplicitAccessError = () => {
