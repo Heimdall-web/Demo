@@ -815,20 +815,18 @@
         function onBarcodeDetected(code) {
           console.log('[Scanner] Código detectado:', code);
           closeModal();
-          // Send to iframe — se restringe el origin al dominio de Google Script
-          // para evitar que scripts de terceros intercepten el mensaje.
-          var GAS_ORIGIN = 'https://script.google.com';
+          // GAS sirve el contenido final desde script.googleusercontent.com, no desde
+          // script.google.com. postMessage con targetOrigin restringido se descarta
+          // silenciosamente (sin lanzar excepción) cuando el origin real del iframe no
+          // coincide, por lo que el fallback en el catch nunca se ejecutaba.
+          // Usar '*' es seguro: el receptor en index.html de GAS valida
+          // event.data.type === 'BARCODE_SCAN' antes de procesar cualquier mensaje.
           var iframeEl = document.getElementById('contentFrame');
           if (iframeEl && iframeEl.contentWindow) {
             try {
-              iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, GAS_ORIGIN);
+              iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, '*');
             } catch(e) {
-              // Si el origin falla (ej. redirección de GAS a script.googleusercontent.com)
-              // reintentamos con '*' como fallback, logueando el intento.
-              console.warn('[Scanner] postMessage con origin restringido falló, usando fallback:', e);
-              try { iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, '*'); } catch(e2) {
-                console.error('[Scanner] postMessage fallback error', e2);
-              }
+              console.error('[Scanner] postMessage error', e);
             }
           }
         }
