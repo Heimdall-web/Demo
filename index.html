@@ -642,7 +642,7 @@
       <div class="iframe-wrap">
         <iframe
           id="contentFrame"
-          src="https://script.google.com/macros/s/AKfycbwUNDpIZrNs-zi4k6bQTj2CleUcQUFA09qj5bG6TWTmQZ_pBXfToK5zSh_XyoAMAQc/exec"
+          src="https://script.google.com/macros/s/AKfycby9-Np-zoR9hZ5ms1z38Cgqe0E3L9tWWfTqm2Je5TZFx59_V9inWxIfdQ46LSpFJpM/exec"
           title="Contenido principal"
           loading="eager"
           allow="fullscreen; geolocation; microphone; camera"
@@ -1239,13 +1239,38 @@
       })();
       // ── End Photo Camera ──
 
+      // ── Scanner FAB visibility control ──
+      // Oculta/muestra el botón flotante cuando la GAS app abre/cierra el modal
+      // de "Crear cuenta nueva" (donde el escáner de código de barras no es útil).
+      (function () {
+        var fab = document.getElementById('scannerFab');
+        window.addEventListener('message', function (event) {
+          try {
+            if (!event || !event.data) return;
+            if (event.data.type === 'SCANNER_FAB_HIDE') {
+              if (fab) fab.style.display = 'none';
+            } else if (event.data.type === 'SCANNER_FAB_SHOW') {
+              // Solo mostrar si la aplicación ya estaba visible (no en mantenimiento)
+              if (fab && fab.dataset.wasVisible === 'true') fab.style.display = 'flex';
+            }
+          } catch(e) {}
+        });
+        // Registrar que el FAB estaba visible cuando se abra el modal
+        var origDisplay = Object.getOwnPropertyDescriptor(CSSStyleDeclaration.prototype, 'display');
+        var _fabObserver = new MutationObserver(function() {
+          if (fab && fab.style.display === 'flex') fab.dataset.wasVisible = 'true';
+        });
+        if (fab) _fabObserver.observe(fab, { attributes: true, attributeFilter: ['style'] });
+      })();
+      // ── End Scanner FAB visibility control ──
+
       const iframe = document.getElementById('contentFrame');
       const loading = document.getElementById('loading');
       const maintenance = document.getElementById('maintenance');
       const reloadBtn = document.getElementById('reloadBtn');
       const openRemoteBtn = document.getElementById('openRemoteBtn');
       const errorReason = document.getElementById('errorReason');
-      const remoteUrl = iframe?.getAttribute('src') || 'https://script.google.com/macros/s/AKfycbwUNDpIZrNs-zi4k6bQTj2CleUcQUFA09qj5bG6TWTmQZ_pBXfToK5zSh_XyoAMAQc/exec';
+      const remoteUrl = iframe?.getAttribute('src') || 'https://script.google.com/macros/s/AKfycby9-Np-zoR9hZ5ms1z38Cgqe0E3L9tWWfTqm2Je5TZFx59_V9inWxIfdQ46LSpFJpM/exec';
 
       const syncViewportHeight = () => {
         const height = window.innerHeight || document.documentElement.clientHeight || screen.height;
