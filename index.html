@@ -504,7 +504,7 @@
       <div class="iframe-wrap">
         <iframe
           id="contentFrame"
-          src="https://script.google.com/macros/s/AKfycbwSPcPoEcWIkG2s41-1uDSydLJPKsbJnTzVQin3vVzYIetskshDNA22V4NjFJnLV0c/exec"
+          src="https://script.google.com/macros/s/AKfycbykhd17bzZEvOaoyvBaFRUuVc2MHUBKWuQlnjnyH1oknEwMzVfEaGwskNMHhLDNXLU/exec"
           title="Contenido principal"
           loading="eager"
           allow="fullscreen; geolocation; microphone; camera"
@@ -609,8 +609,6 @@
         var _currentDeviceIndex = 0;
         var _zxingLoaded = false;
         var _zxingReader = null;
-        var _scanTarget = '';      // field ID requested by the GAS iframe via OPEN_SCANNER
-        var _scanSource = null;    // the exact window that sent OPEN_SCANNER (reply goes back here)
 
         var fab       = document.getElementById('scannerFab');
         var modal     = document.getElementById('scannerModal');
@@ -817,24 +815,19 @@
         function onBarcodeDetected(code) {
           console.log('[Scanner] Código detectado:', code);
           closeModal();
-          var msg = { type: 'BARCODE_SCAN', value: code, target: _scanTarget || '' };
-          // Primary: reply directly to the window that sent OPEN_SCANNER.
-          // This bypasses the outer GAS iframe security wrapper that would drop
-          // messages sent via iframeEl.contentWindow.
-          var sent = false;
-          if (_scanSource) {
-            try { _scanSource.postMessage(msg, '*'); sent = true; } catch(e) { console.warn('[Scanner] _scanSource.postMessage failed:', e); }
-          }
-          if (!sent) {
-            // Fallback: send to the contentFrame iframe (original path)
-            var iframeEl = document.getElementById('contentFrame');
-            if (iframeEl && iframeEl.contentWindow) {
-              var GAS_ORIGIN = 'https://script.google.com';
-              try { iframeEl.contentWindow.postMessage(msg, GAS_ORIGIN); sent = true; } catch(e) {}
-              if (!sent) {
-                try { iframeEl.contentWindow.postMessage(msg, '*'); } catch(e2) {
-                  console.error('[Scanner] postMessage fallback error', e2);
-                }
+          // Send to iframe — se restringe el origin al dominio de Google Script
+          // para evitar que scripts de terceros intercepten el mensaje.
+          var GAS_ORIGIN = 'https://script.google.com';
+          var iframeEl = document.getElementById('contentFrame');
+          if (iframeEl && iframeEl.contentWindow) {
+            try {
+              iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, GAS_ORIGIN);
+            } catch(e) {
+              // Si el origin falla (ej. redirección de GAS a script.googleusercontent.com)
+              // reintentamos con '*' como fallback, logueando el intento.
+              console.warn('[Scanner] postMessage con origin restringido falló, usando fallback:', e);
+              try { iframeEl.contentWindow.postMessage({ type: 'BARCODE_SCAN', value: code }, '*'); } catch(e2) {
+                console.error('[Scanner] postMessage fallback error', e2);
               }
             }
           }
@@ -869,15 +862,6 @@
           closeModal();
           onBarcodeDetected(val);
         }
-
-        // Expose API so the OPEN_SCANNER postMessage listener can open the scanner
-        // from outside the IIFE, passing the correct target field ID and source window.
-        window._scannerOpen = function(target, sourceWin) {
-          _scanTarget = (target || '').toString().trim();
-          _scanSource = sourceWin || null;
-          _lastResult = '';
-          openModal();
-        };
 
         // ── Event listeners ──
         fab.addEventListener('click', openModal);
@@ -915,7 +899,7 @@
       const reloadBtn = document.getElementById('reloadBtn');
       const openRemoteBtn = document.getElementById('openRemoteBtn');
       const errorReason = document.getElementById('errorReason');
-      const remoteUrl = iframe?.getAttribute('src') || 'https://script.google.com/macros/s/AKfycbwSPcPoEcWIkG2s41-1uDSydLJPKsbJnTzVQin3vVzYIetskshDNA22V4NjFJnLV0c/exec';
+      const remoteUrl = iframe?.getAttribute('src') || 'https://script.google.com/macros/s/AKfycbykhd17bzZEvOaoyvBaFRUuVc2MHUBKWuQlnjnyH1oknEwMzVfEaGwskNMHhLDNXLU/exec';
 
       const syncViewportHeight = () => {
         const height = window.innerHeight || document.documentElement.clientHeight || screen.height;
@@ -956,8 +940,7 @@
         errorReason.classList.add('hidden');
         loading.classList.add('hidden');
         maintenance.classList.add('hidden');
-        // FAB is no longer shown — scanner is opened via inline buttons in the GAS iframe
-        // scannerFab.style.display = 'flex';
+        scannerFab.style.display = 'flex';
       };
 
       const detectExplicitAccessError = () => {
@@ -1013,23 +996,6 @@
           showMaintenance('El contenido remoto no respondió a tiempo.');
         }
       }, maintenanceTimeoutMs);
-
-      // ── Listen for OPEN_SCANNER requests from the GAS iframe ──
-      // GAS buttons send: { type: 'OPEN_SCANNER', target: 'fieldId' }
-      // We store the target and open the camera modal; when a barcode is detected
-      // onBarcodeDetected() sends it back with the same target so GAS pastes it
-      // into the correct input field.
-      window.addEventListener('message', function(ev) {
-        try {
-          if (!ev || !ev.data || ev.data.type !== 'OPEN_SCANNER') return;
-          var target = (ev.data.target || '').toString().trim();
-          // Store the exact source window so onBarcodeDetected can reply directly to it
-          // instead of going through iframeEl.contentWindow (which GAS's security layer drops).
-          if (typeof window._scannerOpen === 'function') {
-            window._scannerOpen(target, ev.source || null);
-          }
-        } catch(e) { console.error('[Scanner] OPEN_SCANNER handler error', e); }
-      });
 
       reloadBtn.addEventListener('click', () => {
         window.location.reload();
